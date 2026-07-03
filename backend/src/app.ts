@@ -5,7 +5,9 @@ import express, {
   type Response,
 } from "express";
 import config from "./config/index.js";
-import globalErrorHandler from "./middleware/globalErrorHandler.js";
+import { globalErrorHandler } from "./core/middleware/globalErrorHandler.js";
+import { notFound } from "./core/middleware/notFound.js";
+import { apiRouter } from "./routes/index.js";
 
 const app: Application = express();
 
@@ -18,6 +20,9 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
+app.use("/api", apiRouter);
+
+app.use(notFound);
 app.use(globalErrorHandler);
 
 export default app;
