@@ -15,6 +15,8 @@ const config = {
     /** Bot token. When empty, the Discord bot is disabled. */
     botToken: process.env.DISCORD_BOT_TOKEN ?? "",
     commandPrefix: process.env.DISCORD_COMMAND_PREFIX ?? "!",
+    /** Channel to post live alerts to. When empty, live alerts are disabled. */
+    alertChannelId: process.env.DISCORD_ALERT_CHANNEL_ID ?? "",
   },
 
   llm: {

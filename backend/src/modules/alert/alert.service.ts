@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { logger } from "../../core/utils/logger.js";
 import type { Alert, Device } from "../../types/domain.js";
 import { getTotalPower } from "../power/power.service.js";
 import { alertRules } from "./alert.rules.js";
@@ -7,6 +8,8 @@ import type { AlertContext } from "./alert.types.js";
 
 /** Newest-first cap so the in-memory alert list can't grow unbounded. */
 const MAX_ALERTS = 50;
+
+type AlertListener = (alert: Alert) => void;
 
 /**
  * Evaluates device state against the alert rules and stores generated alerts
@@ -16,6 +19,25 @@ const MAX_ALERTS = 50;
 class AlertEngine {
   private alerts: Alert[] = [];
   private readonly activeSignatures = new Set<string>();
+  private readonly listeners = new Set<AlertListener>();
+
+  /** Subscribe to newly created alerts. Returns an unsubscribe function. */
+  onAlert(listener: AlertListener): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notify(alert: Alert): void {
+    for (const listener of this.listeners) {
+      try {
+        listener({ ...alert });
+      } catch (error) {
+        logger.error("Alert listener failed", error);
+      }
+    }
+  }
 
   evaluate(devices: Device[]): Alert[] {
     const context: AlertContext = {
@@ -51,6 +73,7 @@ class AlertEngine {
 
       this.alerts.unshift(alert);
       created.push(alert);
+      this.notify(alert);
     }
 
     if (this.alerts.length > MAX_ALERTS) {

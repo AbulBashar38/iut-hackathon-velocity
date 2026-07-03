@@ -7,9 +7,13 @@ import {
 
 import config from "../../config/index.js";
 import { logger } from "../../core/utils/logger.js";
+import { alertService } from "../alert/alert.service.js";
+import type { Alert } from "../../types/domain.js";
 import { buildHelpText, commands } from "./commands/index.js";
+import { formatAlert } from "./formatters.js";
 
 let client: Client | null = null;
+let unsubscribeAlerts: (() => void) | null = null;
 
 const handleMessage = async (message: Message): Promise<void> => {
   if (message.author.bot) return;
@@ -42,6 +46,38 @@ const handleMessage = async (message: Message): Promise<void> => {
   }
 };
 
+/** Posts a single alert to the configured channel. */
+const postAlert = async (
+  readyClient: Client<true>,
+  channelId: string,
+  alert: Alert,
+): Promise<void> => {
+  try {
+    const channel = await readyClient.channels.fetch(channelId);
+    if (channel?.isSendable()) {
+      await channel.send(formatAlert(alert));
+    } else {
+      logger.warn(`Alert channel ${channelId} is not a sendable text channel`);
+    }
+  } catch (error) {
+    logger.error("Failed to post alert to Discord", error);
+  }
+};
+
+/** Subscribes the bot to live alerts, forwarding each to the alert channel. */
+const setupAlertForwarding = (readyClient: Client<true>): void => {
+  const channelId = config.discord.alertChannelId;
+  if (!channelId) {
+    logger.info("Discord live alerts disabled (no DISCORD_ALERT_CHANNEL_ID)");
+    return;
+  }
+
+  unsubscribeAlerts = alertService.onAlert((alert) => {
+    void postAlert(readyClient, channelId, alert);
+  });
+  logger.info("Discord live alerts enabled");
+};
+
 /** Starts the Discord bot if a token is configured; otherwise no-ops. */
 export const startDiscordBot = async (): Promise<void> => {
   if (!config.discord.botToken) {
@@ -59,6 +95,7 @@ export const startDiscordBot = async (): Promise<void> => {
 
   client.once(Events.ClientReady, (readyClient) => {
     logger.info(`Discord bot logged in as ${readyClient.user.tag}`);
+    setupAlertForwarding(readyClient);
   });
 
   client.on(Events.MessageCreate, (message) => {
@@ -70,6 +107,8 @@ export const startDiscordBot = async (): Promise<void> => {
 
 export const stopDiscordBot = async (): Promise<void> => {
   if (!client) return;
+  unsubscribeAlerts?.();
+  unsubscribeAlerts = null;
   await client.destroy();
   client = null;
   logger.info("Discord bot stopped");

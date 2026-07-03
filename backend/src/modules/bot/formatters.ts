@@ -1,7 +1,21 @@
+import type { Alert, AlertSeverity } from "../../types/domain.js";
 import type { RoomFacts, StatusFacts, UsageFacts } from "./bot.types.js";
 
 const pluralize = (word: string, count: number): string =>
   count === 1 ? word : `${word}s`;
+
+const SEVERITY_ICON: Record<AlertSeverity, string> = {
+  critical: "🔴",
+  warning: "⚠️",
+  info: "ℹ️",
+};
+
+/** e.g. "🔴 **CRITICAL** [Work Room 2] 3 device(s) are still ON after office hours." */
+export const formatAlert = (alert: Alert): string => {
+  const icon = SEVERITY_ICON[alert.severity];
+  const room = alert.room ? ` [${alert.room}]` : "";
+  return `${icon} **${alert.severity.toUpperCase()}**${room} ${alert.message}`;
+};
 
 /** e.g. "Drawing Room: 1 fan ON, 2 lights ON." or "Work Room 1: all off." */
 export const formatRoom = (facts: RoomFacts): string => {
