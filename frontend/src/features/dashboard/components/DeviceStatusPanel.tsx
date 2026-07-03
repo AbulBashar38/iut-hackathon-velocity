@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DeviceStatusBadge } from '@/features/devices/components/DeviceStatusBadge'
+import { formatClockTime } from '@/lib/formatTime'
 import type { Device } from '@/types/device.types'
 
 interface DeviceStatusPanelProps {
@@ -31,7 +32,9 @@ function DeviceRow({ device }: { device: Device }) {
 
       <div className="hidden text-right sm:block">
         <p className="text-sm tabular-nums">{device.powerConsumption} W</p>
-        <p className="text-xs text-muted-foreground">{device.lastChanged}</p>
+        <p className="text-xs text-muted-foreground">
+          {formatClockTime(device.lastChanged)}
+        </p>
       </div>
 
       <DeviceStatusBadge status={device.status} />

@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { formatClockTime } from '@/lib/formatTime'
 import type { Alert, AlertSeverity } from '@/types/device.types'
 
 interface AlertsPanelProps {
@@ -34,7 +35,7 @@ function AlertRow({ alert }: { alert: Alert }) {
         <p className="text-sm">{alert.message}</p>
         <p className="mt-1 text-xs text-muted-foreground">
           {alert.room ? `${alert.room} · ` : ''}
-          {alert.timestamp}
+          {formatClockTime(alert.timestamp)}
         </p>
       </div>
     </li>
