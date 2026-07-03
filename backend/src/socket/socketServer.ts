@@ -40,15 +40,9 @@ export const initSocket = (httpServer: HttpServer): MonitoringServer => {
   });
 
   io.on("connection", (socket) => {
-    logger.debug(`Socket connected: ${socket.id}`);
-
     // Sync late joiners with the current snapshot immediately.
     socket.emit(SOCKET_EVENTS.devicesUpdated, deviceStore.getAll());
     socket.emit(SOCKET_EVENTS.powerUpdated, powerService.getSummary());
-
-    socket.on("disconnect", () => {
-      logger.debug(`Socket disconnected: ${socket.id}`);
-    });
   });
 
   // Any store change → rebroadcast. This is the single data-flow wiring point.
