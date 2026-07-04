@@ -31,13 +31,13 @@ last-changed timestamp.
 
 ![System architecture diagram](./images/systemDiagram.png)
 
-> 📐 [View / Download full architecture diagram (Google Drive)](https://drive.google.com/file/d/1m3ZN0V8mEsxE-e_7NSsPz1dQZhH9ZFIQ/view)
+> 📐 [View / Download full architecture diagram (Google Drive)](https://drive.google.com/drive/folders/1OMlAP5J_QP5RI67z9nue1YNvsXNypYoK?usp=sharing)
 
 ### Hardware / Electrical Schematic
 
 ![IoT hardware schematic diagram](./images/iotDiagram.png)
 
-> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/file/d/1HcfKdvwNvdMNpbM4zAZpedssS3ojP37T/view?usp=sharing)
+> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/drive/folders/1OMlAP5J_QP5RI67z9nue1YNvsXNypYoK?usp=sharing)
 
 Three cooperating parts:
 
