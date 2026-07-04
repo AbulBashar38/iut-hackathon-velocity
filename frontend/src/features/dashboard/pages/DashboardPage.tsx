@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { AlertsPanel } from '@/features/alerts/components/AlertsPanel'
+import { BotCommandsCard } from '@/features/dashboard/components/BotCommandsCard'
 import { OfficeLayout } from '@/features/office-layout/components/OfficeLayout'
 import { RealtimeProvider } from '@/features/realtime/RealtimeContext'
 import { useRealtime } from '@/features/realtime/useRealtime'
@@ -14,9 +15,10 @@ import { DeviceStatusPanel } from '@/features/dashboard/components/DeviceStatusP
 import { PowerConsumptionPanel } from '@/features/dashboard/components/PowerConsumptionPanel'
 import { StatisticsCards } from '@/features/dashboard/components/StatisticsCards'
 import { DeviceDistributionChart } from '@/features/dashboard/components/charts/DeviceDistributionChart'
-import { EstimatedUsageChart } from '@/features/dashboard/components/charts/EstimatedUsageChart'
 import { PowerByRoomChart } from '@/features/dashboard/components/charts/PowerByRoomChart'
-import { mockHourlyUsage } from '@/features/dashboard/data/usage.mock'
+// "Today's Estimated Usage" is dummy data and not applicable to live monitoring — hidden for now.
+// import { EstimatedUsageChart } from '@/features/dashboard/components/charts/EstimatedUsageChart'
+// import { mockHourlyUsage } from '@/features/dashboard/data/usage.mock'
 import {
   getTypeDistribution,
   type DashboardSummary,
@@ -53,7 +55,10 @@ function DashboardView() {
             </CardContent>
           </Card>
 
-          <AlertsPanel alerts={alerts} />
+          <div className="grid content-start gap-6">
+            <AlertsPanel alerts={alerts} />
+            <BotCommandsCard />
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -66,10 +71,11 @@ function DashboardView() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-2">
           <PowerByRoomChart data={power.roomPower} />
           <DeviceDistributionChart data={distribution} />
-          <EstimatedUsageChart data={mockHourlyUsage} />
+          {/* "Today's Estimated Usage" chart hidden — dummy data, not applicable to live monitoring.
+          <EstimatedUsageChart data={mockHourlyUsage} /> */}
         </div>
       </div>
     </div>
