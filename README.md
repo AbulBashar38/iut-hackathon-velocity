@@ -37,7 +37,9 @@ last-changed timestamp.
 
 ![IoT hardware schematic diagram](./images/iotDiagram.png)
 
-> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/file/d/1HcfKdvwNvdMNpbM4zAZpedssS3ojP37T/view?usp=sharing)
+> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/file/d/1HcfKdvwNvdMNpbM4zAZpedssS3ojP37T/view?usp=sharing) · [Live interactive diagram on Wokwi](https://wokwi.com/projects/468619032049339393)
+>
+> *Designed with [Wokwi](https://wokwi.com)*
 
 Three cooperating parts:
 
