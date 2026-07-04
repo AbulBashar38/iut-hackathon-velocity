@@ -57,7 +57,6 @@ function DashboardView() {
 
           <div className="grid content-start gap-6">
             <AlertsPanel alerts={alerts} />
-            <BotCommandsCard />
           </div>
         </div>
 
@@ -71,9 +70,10 @@ function DashboardView() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           <PowerByRoomChart data={power.roomPower} />
           <DeviceDistributionChart data={distribution} />
+           <BotCommandsCard />
           {/* "Today's Estimated Usage" chart hidden — dummy data, not applicable to live monitoring.
           <EstimatedUsageChart data={mockHourlyUsage} /> */}
         </div>
