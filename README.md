@@ -1,5 +1,7 @@
 # IoT Office Monitoring System
 
+> **Live Demo:** [https://iut-hackathon-velocity.vercel.app](https://iut-hackathon-velocity.vercel.app/)
+
 A real-time, **read-only** monitoring platform for a smart office. There are **no
 real IoT devices** — a backend service **simulates** them, calculates power usage,
 raises alerts, and streams everything live to a web dashboard over Socket.io. An
@@ -7,6 +9,8 @@ optional, LLM-assisted **Discord bot** lets you query office status from chat.
 
 Built for a hackathon, but architected cleanly so real devices, a database, and
 more integrations can be added later without rewrites.
+
+![IoT Office Monitoring dashboard](./images/heroDashboard.png)
 
 ---
 
@@ -25,27 +29,15 @@ last-changed timestamp.
 
 ## System Architecture
 
-```
-                        ┌─────────────────────────────────────┐
-                        │              BACKEND                 │
-                        │                                      │
-  Simulation Engine ───►│  DeviceStore (single source of truth)│
-   (every 5s)           │        │ onChange                    │
-                        │        ▼                             │
-                        │  Power + Alert services              │
-                        │        │                             │
-                        │   ┌────┴─────┐                        │
-                        │   ▼          ▼                        │
-                        │ REST API   Socket.io ── alertCreated ─┼──► Discord Bot
-                        └───┬──────────┬──────────────────────-─┘      (optional,
-                            │          │                                LLM-assisted)
-              initial load  │          │  live updates
-                            ▼          ▼
-                        ┌─────────────────────────────────────┐
-                        │        FRONTEND (Dashboard)          │
-                        │  RealtimeProvider → live UI          │
-                        └─────────────────────────────────────┘
-```
+![System architecture diagram](./images/systemDiagram.png)
+
+> 📐 [View / Download full architecture diagram (Google Drive)](https://drive.google.com/file/d/1m3ZN0V8mEsxE-e_7NSsPz1dQZhH9ZFIQ/view)
+
+### Hardware / Electrical Schematic
+
+![IoT hardware schematic diagram](./images/iotDiagram.png)
+
+> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/file/d/1HcfKdvwNvdMNpbM4zAZpedssS3ojP37T/view?usp=sharing)
 
 Three cooperating parts:
 
@@ -132,6 +124,18 @@ Full Discord setup (intents, invite URL) is in `backend/README.md`.
 
 ---
 
+## Screenshots
+
+### Statistics & charts
+![Statistics dashboard](./images/statsDashboard.png)
+
+### Discord bot
+![Discord bot commands and live alerts](./images/discordBot.png)
+
+> 🤖 **Try it live:** [Join the Discord server](https://discord.gg/67DRnN7af), go to the **#general** channel, and type `!status`, `!room work1`, or `!usage` to get real-time office status from the bot.
+
+---
+
 ## Ports & Configuration
 
 | Service   | Default URL             | Key env vars                                 |
@@ -164,6 +168,14 @@ each other. Defaults are pre-wired for local development.
   and authentication can replace individual modules without touching the rest.
 - **LLM never invents data** — the bot computes exact facts first; the model only
   rephrases them, with a deterministic fallback.
+
+---
+
+## Video Explanation
+
+[![Watch the video explanation](./images/videoExplain.png)](https://drive.google.com/file/d/17p4p4XLER55bBewBg7gljuSjJ-5zcALI/view?usp=sharing)
+
+> 🎬 [Watch the full video explanation (Google Drive)](https://drive.google.com/file/d/17p4p4XLER55bBewBg7gljuSjJ-5zcALI/view?usp=sharing)
 
 ---
 
