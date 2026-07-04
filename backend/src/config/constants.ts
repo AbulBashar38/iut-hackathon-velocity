@@ -39,3 +39,13 @@ export const ALERT_THRESHOLDS = {
   /** Total office draw (W) at/above which a high-power alert is raised. */
   highPowerWatts: 600,
 } as const;
+
+/**
+ * A condition must hold continuously for this long before it alerts. Filters
+ * out momentary simulation blips so a whole-room alert actually means the room
+ * stayed fully on, not that it flickered on for one tick.
+ */
+export const ALERT_SUSTAIN_MS = 15_000;
+
+/** Once fired, the same condition won't alert again until this passes. */
+export const ALERT_COOLDOWN_MS = 10 * 60_000;
