@@ -1,5 +1,5 @@
 import { ALERT_THRESHOLDS, OFFICE_HOURS } from "../../config/constants.js";
-import { ROOMS, type Device } from "../../types/domain.js";
+import { ROOMS } from "../../types/domain.js";
 import type { AlertRule } from "./alert.types.js";
 
 const isAfterHours = (now: Date): boolean => {
@@ -7,34 +7,24 @@ const isAfterHours = (now: Date): boolean => {
   return hour < OFFICE_HOURS.start || hour >= OFFICE_HOURS.end;
 };
 
-const roomPower = (devices: Device[]): number =>
-  devices.reduce((sum, device) => sum + device.powerConsumption, 0);
-
-/** Devices left ON outside office hours, with a per-room breakdown. */
+/** Devices left ON outside office hours. */
 export const afterHoursRule: AlertRule = ({ devices, now }) => {
   if (!isAfterHours(now)) return [];
 
-  const active = devices.filter((device) => device.status === "on");
-  if (active.length === 0) return [];
-
-  const breakdown = ROOMS.map((room) => {
-    const count = active.filter((device) => device.room === room).length;
-    return count > 0 ? `${room} (${count})` : null;
-  })
-    .filter((entry): entry is string => entry !== null)
-    .join(", ");
+  const activeCount = devices.filter((device) => device.status === "on").length;
+  if (activeCount === 0) return [];
 
   return [
     {
       signature: "after_hours",
       type: "after_hours",
       severity: "critical",
-      message: `${active.length} device(s) still ON after office hours (closes ${OFFICE_HOURS.end}:00) — ${breakdown}.`,
+      message: `${activeCount} device(s) are still ON after office hours.`,
     },
   ];
 };
 
-/** Every device in a room is running, with count and current draw. */
+/** Every device in a room is running. */
 export const roomContinuousRule: AlertRule = ({ devices }) =>
   ROOMS.flatMap((room) => {
     const inRoom = devices.filter((device) => device.room === room);
@@ -48,7 +38,7 @@ export const roomContinuousRule: AlertRule = ({ devices }) =>
         signature: `room_continuous:${room}`,
         type: "room_continuous" as const,
         severity: "warning" as const,
-        message: `All ${inRoom.length} devices in ${room} are ON, drawing ${roomPower(inRoom)} W. Consider switching some off.`,
+        message: `All devices in ${room} are running.`,
         room,
       },
     ];
@@ -56,18 +46,14 @@ export const roomContinuousRule: AlertRule = ({ devices }) =>
 
 /** Total office power draw above the configured threshold. */
 export const highPowerRule: AlertRule = ({ totalPower }) => {
-  const limit = ALERT_THRESHOLDS.highPowerWatts;
-  if (totalPower < limit) return [];
-
-  const over = totalPower - limit;
-  const severity = totalPower >= limit * 1.5 ? "critical" : "warning";
+  if (totalPower < ALERT_THRESHOLDS.highPowerWatts) return [];
 
   return [
     {
       signature: "high_power",
       type: "high_power",
-      severity,
-      message: `High power draw: ${totalPower} W — ${over} W over the ${limit} W limit.`,
+      severity: "warning",
+      message: `High power consumption: ${totalPower} W exceeds ${ALERT_THRESHOLDS.highPowerWatts} W.`,
     },
   ];
 };

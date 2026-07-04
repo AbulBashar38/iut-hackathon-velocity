@@ -1,37 +1,27 @@
 import { randomUUID } from "node:crypto";
 
-import { ALERT_COOLDOWN_MS, ALERT_SUSTAIN_MS } from "../../config/constants.js";
 import { logger } from "../../core/utils/logger.js";
 import type { Alert, Device } from "../../types/domain.js";
 import { getTotalPower } from "../power/power.service.js";
 import { alertRules } from "./alert.rules.js";
-import type { AlertCandidate, AlertContext } from "./alert.types.js";
+import type { AlertContext } from "./alert.types.js";
 
 /** Newest-first cap so the in-memory alert list can't grow unbounded. */
 const MAX_ALERTS = 50;
 
 type AlertListener = (alert: Alert) => void;
 
-/** Per-condition tracking for sustain + cooldown throttling. */
-interface ConditionState {
-  firstSeenAt: number;
-  lastFiredAt: number;
-}
-
 /**
  * Evaluates device state against the alert rules and stores generated alerts
- * in memory. Alerts are throttled two ways so they stay meaningful:
- *  - Sustain: a condition must hold continuously for ALERT_SUSTAIN_MS before
- *    firing (ignores momentary simulation flips).
- *  - Cooldown: after firing, the same condition stays quiet for
- *    ALERT_COOLDOWN_MS even if it keeps holding (then re-fires as a reminder).
- * A condition that clears resets its sustain timer.
+ * in memory. Alerts are edge-triggered: an active-signature set ensures each
+ * condition fires once until it clears, preventing per-tick duplicates.
  */
 class AlertEngine {
   private alerts: Alert[] = [];
-  private readonly states = new Map<string, ConditionState>();
+  private readonly activeSignatures = new Set<string>();
   private readonly listeners = new Set<AlertListener>();
 
+  /** Subscribe to newly created alerts. Returns an unsubscribe function. */
   onAlert(listener: AlertListener): () => void {
     this.listeners.add(listener);
     return () => {
@@ -49,55 +39,41 @@ class AlertEngine {
     }
   }
 
-  private createAlert(candidate: AlertCandidate, timestamp: string): Alert {
-    return {
-      id: `alert-${randomUUID()}`,
-      type: candidate.type,
-      severity: candidate.severity,
-      message: candidate.message,
-      timestamp,
-      ...(candidate.room ? { room: candidate.room } : {}),
-    };
-  }
-
   evaluate(devices: Device[]): Alert[] {
     const context: AlertContext = {
       devices,
       now: new Date(),
       totalPower: getTotalPower(devices),
     };
-    const now = context.now.getTime();
 
     const candidates = alertRules.flatMap((rule) => rule(context));
-    const current = new Map(candidates.map((c) => [c.signature, c]));
+    const currentSignatures = new Set(candidates.map((c) => c.signature));
 
-    // Reset tracking for conditions that no longer hold.
-    for (const signature of this.states.keys()) {
-      if (!current.has(signature)) {
-        this.states.delete(signature);
+    // Reset signatures whose condition no longer holds.
+    for (const signature of this.activeSignatures) {
+      if (!currentSignatures.has(signature)) {
+        this.activeSignatures.delete(signature);
       }
     }
 
     const created: Alert[] = [];
 
-    for (const [signature, candidate] of current) {
-      let state = this.states.get(signature);
-      if (!state) {
-        state = { firstSeenAt: now, lastFiredAt: 0 };
-        this.states.set(signature, state);
-      }
+    for (const candidate of candidates) {
+      if (this.activeSignatures.has(candidate.signature)) continue;
+      this.activeSignatures.add(candidate.signature);
 
-      const sustained = now - state.firstSeenAt >= ALERT_SUSTAIN_MS;
-      const cooledDown =
-        state.lastFiredAt === 0 || now - state.lastFiredAt >= ALERT_COOLDOWN_MS;
+      const alert: Alert = {
+        id: `alert-${randomUUID()}`,
+        type: candidate.type,
+        severity: candidate.severity,
+        message: candidate.message,
+        timestamp: context.now.toISOString(),
+        ...(candidate.room ? { room: candidate.room } : {}),
+      };
 
-      if (sustained && cooledDown) {
-        state.lastFiredAt = now;
-        const alert = this.createAlert(candidate, context.now.toISOString());
-        this.alerts.unshift(alert);
-        created.push(alert);
-        this.notify(alert);
-      }
+      this.alerts.unshift(alert);
+      created.push(alert);
+      this.notify(alert);
     }
 
     if (this.alerts.length > MAX_ALERTS) {
