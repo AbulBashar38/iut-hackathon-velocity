@@ -16,11 +16,11 @@ more integrations can be added later without rewrites.
 
 ## The Office
 
-| Room          | Devices              |
-| ------------- | -------------------- |
-| Drawing Room  | 2 fans + 3 lights    |
-| Work Room 1   | 2 fans + 3 lights    |
-| Work Room 2   | 2 fans + 3 lights    |
+| Room         | Devices           |
+| ------------ | ----------------- |
+| Drawing Room | 2 fans + 3 lights |
+| Work Room 1  | 2 fans + 3 lights |
+| Work Room 2  | 2 fans + 3 lights |
 
 **15 devices total.** Each has a status (ON/OFF), current power draw, room, and
 last-changed timestamp.
@@ -37,7 +37,9 @@ last-changed timestamp.
 
 ![IoT hardware schematic diagram](./images/iotDiagram.png)
 
-> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/drive/folders/1OMlAP5J_QP5RI67z9nue1YNvsXNypYoK?usp=sharing)
+> 🔌 [View / Download hardware schematic (Google Drive)](https://drive.google.com/file/d/1HcfKdvwNvdMNpbM4zAZpedssS3ojP37T/view?usp=sharing) · [Live interactive diagram on Wokwi](https://wokwi.com/projects/468619032049339393)
+>
+> _Designed with [Wokwi](https://wokwi.com)_
 
 Three cooperating parts:
 
@@ -52,11 +54,11 @@ Three cooperating parts:
 
 ## Tech Stack
 
-| Layer     | Technologies                                                          |
-| --------- | --------------------------------------------------------------------- |
+| Layer     | Technologies                                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------- |
 | Frontend  | React 19, Vite, TypeScript, Tailwind v4, shadcn/ui, Recharts, Socket.io client, React Hook Form, Zod |
-| Backend   | Node.js, Express 5, TypeScript, Socket.io, Zod                        |
-| Bot / LLM | discord.js, Google Gemini                                             |
+| Backend   | Node.js, Express 5, TypeScript, Socket.io, Zod                                                       |
+| Bot / LLM | discord.js, Google Gemini                                                                            |
 
 No database — all state is in memory.
 
@@ -127,9 +129,11 @@ Full Discord setup (intents, invite URL) is in `backend/README.md`.
 ## Screenshots
 
 ### Statistics & charts
+
 ![Statistics dashboard](./images/statsDashboard.png)
 
 ### Discord bot
+
 ![Discord bot commands and live alerts](./images/discordBot.png)
 
 > 🤖 **Try it live:** [Join the Discord server](https://discord.gg/67DRnN7af), go to the **#general** channel, and type `!status`, `!room work1`, or `!usage` to get real-time office status from the bot.
@@ -138,10 +142,10 @@ Full Discord setup (intents, invite URL) is in `backend/README.md`.
 
 ## Ports & Configuration
 
-| Service   | Default URL             | Key env vars                                 |
-| --------- | ----------------------- | -------------------------------------------- |
-| Backend   | `http://localhost:6006` | `PORT`, `CLIENT_ORIGIN`, `DISCORD_*`, `GEMINI_API_KEY` |
-| Frontend  | `http://localhost:5173` | `VITE_SOCKET_URL`                            |
+| Service  | Default URL             | Key env vars                                           |
+| -------- | ----------------------- | ------------------------------------------------------ |
+| Backend  | `http://localhost:6006` | `PORT`, `CLIENT_ORIGIN`, `DISCORD_*`, `GEMINI_API_KEY` |
+| Frontend | `http://localhost:5173` | `VITE_SOCKET_URL`                                      |
 
 The backend's `CLIENT_ORIGIN` and the frontend's `VITE_SOCKET_URL` must point at
 each other. Defaults are pre-wired for local development.
